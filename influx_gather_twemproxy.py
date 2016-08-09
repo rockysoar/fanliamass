@@ -68,10 +68,13 @@ if '__main__' == __name__:
     if not os.path.exists(iplist): 
         raise SystemExit, 'File %s Not Exists!' % iplist
 
-    hostCount = 0
+    threads = []
     for host in open(iplist):
-        hostCount += 1
-        threading.Thread(target = twemproxy_info_dump, args = tuple(host.split(':'))).start()
+        t = threading.Thread(target = twemproxy_info_dump, args = tuple(host.split(':')))
+        threads.append(t)
 
-    print 'Host collection complate: %d' % hostCount
+    [t.start() for t in threads]
+    [t.join(3) for t in threads]
+
+    print 'Host collection complate: %d' % len(threads) 
 
