@@ -76,5 +76,5 @@ if '__main__' == __name__:
     [t.start() for t in threads]
     [t.join(3) for t in threads]
 
-    print 'Host collection complate: %d' % len(threads) 
+    print 'Collection complate: %d' % len(threads) 
 
