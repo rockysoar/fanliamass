@@ -42,7 +42,6 @@ def twemproxy_info_dump(ncHost, ncPort=22222):
     })
 
     # 统计一台twemproxy所有redis的总量
-    requests, responses, client_err, server_err, server_timeout = 0, 0, 0, 0, 0
     for key, twInfo_ in twInfo.iteritems():
         if type(twInfo_) is not dict: continue
 
@@ -55,6 +54,7 @@ def twemproxy_info_dump(ncHost, ncPort=22222):
             'tags': {'host': ncHost, 'group': subkey.split('.')[0], 'redis': subkey},
             'fields': {
                 'client_err': twInfo_.get('client_err', 0), 'server_err': redisInfo.get('server_err', 0),
+                'in_queue': redisInfo.get('in_queue', 0), 'out_queue': redisInfo.get('out_queue', 0),
                 'requests': redisInfo.get('requests', 0), 'responses': redisInfo.get('responses', 0),
                 'server_timeout': redisInfo.get('server_timeout', 0)
             }
