@@ -23,8 +23,8 @@ def redis_info_dump(redisHost, redisPort):
         "fields": {
             'connected': info.get('connected_clients'), 
             'blocked': info.get('blocked_clients'),
-            'input_buffer': info.get('client_biggest_input_buf'),
-            'output_list': info.get('client_longest_output_list'),
+            'max_input_buffer': info.get('client_biggest_input_buf'),
+            'max_output_list': info.get('client_longest_output_list'),
         }
     })
     influx_create_points(influxPoints)
