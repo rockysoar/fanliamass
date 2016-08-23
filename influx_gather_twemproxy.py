@@ -30,8 +30,10 @@ def twemproxy_info_dump(ncHost, ncPort=22222):
         if not resp: break
         jsonStr += resp
     socketHandler.close()
-    twInfo = json.loads(jsonStr)
 
+    if '' == jsonStr: return
+
+    twInfo = json.loads(jsonStr)
     # 并发连接数
     influxPoints.append({
         'measurement': 'nc_connections',
