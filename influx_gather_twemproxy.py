@@ -55,10 +55,10 @@ def twemproxy_info_dump(ncHost, ncPort=22222):
             'measurement': 'nc_requests',
             'tags': {'host': ncHost, 'group': subkey.split('.')[0], 'redis': subkey},
             'fields': {
-                'client_err': twInfo_.get('client_err', 0), 'server_err': redisInfo.get('server_err', 0),
+                'client_err': twInfo_.get('client_err', 0), 'client_connections': twInfo_.get('client_connections', 0),
                 'in_queue': redisInfo.get('in_queue', 0), 'out_queue': redisInfo.get('out_queue', 0),
                 'requests': redisInfo.get('requests', 0), 'responses': redisInfo.get('responses', 0),
-                'server_timeout': redisInfo.get('server_timeout', 0)
+                'server_err': redisInfo.get('server_err', 0), 'server_timeout': redisInfo.get('server_timeout', 0)
             }
         })
 
