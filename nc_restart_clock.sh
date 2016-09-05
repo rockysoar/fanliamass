@@ -17,7 +17,7 @@ fi
 
 # new line
 echo >> $RESTART_REASON
-`/etc/init.d/nutcracker restart >> $RESTART_REASON 2>&1`
+/etc/init.d/nutcracker restart >> $RESTART_REASON 2>&1
 
 # 发邮件最好用uuencode处理编码否则body会被当做附件发出；用tr做简单过滤
 tr -t "\r" "\n" < $RESTART_REASON | tr -cd '\11\12\40-\176' | mail -s "Twemproxy restart alarm" $MAIL_ALARM 
