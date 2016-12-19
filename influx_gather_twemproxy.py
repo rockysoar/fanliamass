@@ -26,7 +26,7 @@ def twemproxy_info_dump(ncHost, ncPort=22222):
     socketHandler.connect((ncHost, int(ncPort)))
     jsonStr = ""
     while 1:
-        resp = socketHandler.recv(2048)
+        resp = socketHandler.recv(4096)
         if not resp: break
         jsonStr += resp
     socketHandler.close()
@@ -34,15 +34,7 @@ def twemproxy_info_dump(ncHost, ncPort=22222):
     if '' == jsonStr: return
 
     twInfo = json.loads(jsonStr)
-    # 并发连接数
-    influxPoints.append({
-        'measurement': 'nc_connections',
-        "tags": {'host': ncHost},
-        "fields": {
-            'connections': twInfo.get('curr_connections', 0), 
-        }
-    })
-
+    groups = {}
     # 统计一台twemproxy所有redis的总量
     for key, twInfo_ in twInfo.iteritems():
         if type(twInfo_) is not dict: continue
@@ -50,21 +42,24 @@ def twemproxy_info_dump(ncHost, ncPort=22222):
         # parse substructure information
         subkey = re.sub(r'^(.+)-(\d{4,5})$', r'\1:\2', key)
         redisInfo = twInfo_.get(subkey)
+        group = subkey.split('.')[0];
+        groups[group]['client_connections'] += twInfo_.get('client_connections', 0)
+        groups[group]['client_err'] += twInfo_.get('client_err', 0)
+        groups[group]['requests'] += redisInfo.get('requests', 0)
+        groups[group]['responses'] += redisInfo.get('responses', 0)
+        groups[group]['in_queue'] += redisInfo.get('in_queue', 0)
+        groups[group]['out_queue'] += redisInfo.get('out_queue', 0)
+        groups[group]['in_queue_bytes'] += redisInfo.get('in_queue_bytes', 0)
+        groups[group]['out_queue_bytes'] += redisInfo.get('out_queue_bytes', 0)
+        groups[group]['server_err'] += redisInfo.get('server_err', 0)
+        groups[group]['server_timedout'] += redisInfo.get('server_timedout', 0)
 
-        influxPoints.append({
-            'measurement': 'nc_requests',
-            'tags': {'host': ncHost, 'group': subkey.split('.')[0], 'redis': subkey},
-            'fields': {
-                'client_err': twInfo_.get('client_err', 0), 'client_connections': twInfo_.get('client_connections', 0),
-                'in_queue': redisInfo.get('in_queue', 0), 'out_queue': redisInfo.get('out_queue', 0),
-                'in_queue_bytes': redisInfo.get('in_queue_bytes', 0), 'out_queue_bytes': redisInfo.get('out_queue_bytes', 0),
-                'requests': redisInfo.get('requests', 0), 'responses': redisInfo.get('responses', 0),
-                'server_err': redisInfo.get('server_err', 0), 'server_timeout': redisInfo.get('server_timedout', 0)
-            }
-        })
-
-    # write to influxDB
-    influx_create_points(influxPoints)
+    for key, item in groups.iteritems():
+        # write to influxDB
+        influxPoint = {
+                
+        }
+        influx_create_points(influxPoints)
 
 if '__main__' == __name__:
     iplist = "/opt/scripts/grafana/twemproxy/iplist";
