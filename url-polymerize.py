@@ -33,11 +33,11 @@ def main(csvFile):
 #            keys_.append(k)
 
         if len(keys_) == 0: continue
-        if len(keys_) > 5: keys_ = keys_[0:5]
+        if len(keys_) > 4: keys_ = keys_[0:4]
 
         urlCode = '.'.join(keys_).strip('.')
-        if not urlCodes.get(urlCode): urlCodes[urlCode] = 0
-        urlCodes[urlCode] += 1
+        if not urlCodes.get(urlCode): urlCodes[urlCode] = 1
+        else: urlCodes[urlCode] += 1
 
     for k in urlCodes.items(): print k,v
     print len(urlCodes)
