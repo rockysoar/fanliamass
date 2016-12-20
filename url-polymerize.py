@@ -9,16 +9,12 @@ def main(csvFile):
     for url in f:
         url = url.strip(' "\'\r\n\t')
         if not url: continue
-
         if re.search(r'\.(?:js|css|html|png|jpg)', url): continue
 
         info = urlparse.urlparse(url)
-        host = info.netloc
-        path = info.path
-        query = info.query
 
         keys_ = []; 
-        keys = re.split(r'/|-', path)
+        keys = re.split(r'/|-', info.path)
         for i in range(len(keys)):
             k = keys[i]
             if i == len(keys) - 1: v = ''
@@ -27,18 +23,18 @@ def main(csvFile):
             if dropPair(k, v): i += 1; continue;
             if dropItem(k): continue
             keys_.append(k)
-        if len(keys_) > 3: keys_ = keys_[0:3]
+        if len(keys_) > 4: keys_ = keys_[0:4]
 
-#        kvs = urlparse.parse_qs(info.query)
-#        for k, v in kvs.items():
-#            if not v: continue
-#            if dropPair(k, v[0]) or dropItem(k): continue;
-#            keys_.append(k)
+        kvs = urlparse.parse_qs(info.query)
+        for k, v in kvs.items():
+            if not v: continue
+            if dropPair(k, v[0]) or dropItem(k): continue;
+            keys_.append(k)
 
         if len(keys_) == 0: continue
-        if len(keys_) > 5: keys_ = keys_[0:5]
+        if len(keys_) > 6: keys_ = keys_[0:6]
 
-        urlCode = '.'.join(keys_).strip('.').lower()
+        urlCode = "%s/%s" % (info.hostname, '.'.join(keys_).strip('.').lower())
         if not urlCodes.get(urlCode): urlCodes[urlCode] = 1
         else: urlCodes[urlCode] += 1
 
