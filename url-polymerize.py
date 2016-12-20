@@ -1,4 +1,6 @@
 #!python
+# -*- coding: utf-8 -*-
+
 import re, urlparse
 
 def main(csvFile):
@@ -25,6 +27,7 @@ def main(csvFile):
             if dropPair(k, v): i += 1; continue;
             if dropItem(k): continue
             keys_.append(k)
+        if len(keys_) > 3: keys_ = keys_[0:3]
 
 #        kvs = urlparse.parse_qs(info.query)
 #        for k, v in kvs.items():
@@ -33,9 +36,9 @@ def main(csvFile):
 #            keys_.append(k)
 
         if len(keys_) == 0: continue
-        if len(keys_) > 4: keys_ = keys_[0:4]
+        if len(keys_) > 5: keys_ = keys_[0:5]
 
-        urlCode = '.'.join(keys_).strip('.')
+        urlCode = '.'.join(keys_).strip('.').lower()
         if not urlCodes.get(urlCode): urlCodes[urlCode] = 1
         else: urlCodes[urlCode] += 1
 
@@ -44,32 +47,35 @@ def main(csvFile):
     f.close()
 
 def dropPair(k, v):
-    drop = False;
+    drop = False
+    k = k.lower()
     drop = drop or (type(v) != str)
     drop = drop or re.search(r'[\w\-\.~=]{31,}', v)
     drop = drop or k in ['wifi', '4g']
     drop = drop or (k in ['jsoncallback', 'spm', 'lc', '_t_t_t', 't', '_t', '__', '_'])
-    drop = drop or ((k in ['size', 'psize', 'page_size', 'pagesize', 'psize', 'page']) and re.search(r'^\d*$', v))
+    drop = drop or ((k in ['size', 'psize', 'page_size', 'pagesize', 'psize', 'page', 'p']) and re.search(r'^\d*$', v))
     drop = drop or ('size' == k and (v in ['small', 'big']))
-    drop = drop or ('sort' == k and (v in ['asort-desc', 'asort-asc']))
+    drop = drop or ('sort' == k and re.search(r'default|(\w+_(?:asc|desc))', v, re.IGNORECASE))
     drop = drop or (k in ['verify_code', 'app_ref', 'deviceno', 'device_no', 'devid', 'msg', 'security_id'] and re.search(r'^\w{12,}', v))
-
-    if len(k) >= 12:
-        numCount = 0
-        for i in k:
-            if ord(i) >=48 and ord(i) <= 57: numCount == 1
-        numRate = numCount/len(k)
-        drop = drop or (numRate >= .575 and numRate <= .675)
-
-    m = re.findall(r'(\d+)', k)
-    drop = drop or (len(m) == 2 and len(m[1]) > 2)
 
     return drop
 
 def dropItem(k):
     drop = False
-    drop = drop or not re.search('^[a-zA-Z_]\w{1,24}$', k)
-    drop = drop or re.search('^c_(?:src|v|nt|aver)$', k)
+    #drop = drop or 'index' == k
+    drop = drop or not re.search(r'^[a-zA-Z_]\w{1,24}$', k)
+    drop = drop or re.search(r'^c_(?:src|v|nt|aver)$', k)
+
+    # 数字字母混杂
+    m = re.findall(r'(\d+)', k)
+    drop = drop or (len(m) == 2 and len(m[1]) >= 3)
+
+    if len(k) >= 12:
+        numCount = 0
+        for i in k:
+            if ord(i) >=48 and ord(i) <= 57: numCount += 1
+        numRate = numCount/len(k)
+        drop = drop or (numRate >= .575 and numRate <= .675)
 
     return drop
 
