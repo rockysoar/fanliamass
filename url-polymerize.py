@@ -61,17 +61,13 @@ def dropItem(k):
     #drop = drop or 'index' == k
     drop = drop or not re.search(r'^[a-zA-Z_]\w{1,24}$', k)
     drop = drop or re.search(r'^c_(?:src|v|nt|aver)$', k)
+    if drop: return drop
 
     # 数字字母混杂
-    m = re.findall(r'(\d+)', k)
-    drop = drop or (len(m) == 2 and len(m[1]) >= 3)
-
-    if len(k) >= 12:
-        numCount = 0
-        for i in k:
-            if ord(i) >=48 and ord(i) <= 57: numCount += 1
-        numRate = numCount/len(k)
-        drop = drop or (numRate >= .575 and numRate <= .675)
+    numTimes = re.findall(r'(\d+)', k)
+    numCount = sum(c.isdigit() for c in k)
+    numRate = numCount/len(k)
+    drop = drop or (len(numTimes) >= 2 and numRate >= .575 and numRate <= .675)
 
     return drop
 
