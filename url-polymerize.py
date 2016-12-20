@@ -9,7 +9,7 @@ def main(csvFile):
     for url in f:
         url = url.strip(' "\'\r\n\t')
         if not url: continue
-        if re.search(r'\.(?:js|css|html|png|jpg)', url): continue
+        if re.search(r'\.(?:js|css|png|jpg)', url): continue
 
         info = urlparse.urlparse(url)
 
@@ -47,7 +47,7 @@ def dropPair(k, v):
     k = k.lower()
     drop = drop or (type(v) != str)
     drop = drop or re.search(r'[\w\-\.~=]{31,}', v)
-    drop = drop or k in ['wifi', '4g']
+    drop = drop or (re.search(r'^(?:c_)?nt$', k) and re.search(r'^(?:wifi|cell)$', v))
     drop = drop or (k in ['jsoncallback', 'spm', 'lc', '_t_t_t', 't', '_t', '__', '_'])
     drop = drop or ((k in ['size', 'psize', 'page_size', 'pagesize', 'psize', 'page', 'p']) and re.search(r'^\d*$', v))
     drop = drop or ('size' == k and (v in ['small', 'big']))
@@ -76,5 +76,5 @@ def dropItem(k):
     return drop
 
 if '__main__' == __name__: 
-    main('/usr/local/workdata/exchange/kafka-path.csv')
+    main('/usr/local/workdata/exchange/kafka-path-all.csv')
 
