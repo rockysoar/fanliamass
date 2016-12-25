@@ -4,7 +4,7 @@
 import sys, re, urlparse
 
 def polymerize(url, parseQuery):
-    url = url.strip(' "\'\r\n\t').lower()
+    url = url.strip(' "\'\r\n\t')
     if not url: return 
     if re.search(r'\.(?:js|css|ico|png|jpg)', url): return
 
@@ -58,6 +58,7 @@ def dropPair(k, v, path= ''):
     drop = drop or re.search(r'(start|end)_price', k) and v.isdigit()
     drop = drop or re.search(r'https?://', v)
     drop = drop or re.search(r'^(start|offset|limit)$', k) and re.search(r'search', path)
+    drop = drop or re.search(r'^utm_.*$', k) and len(v) > 12
 
     return drop
 
