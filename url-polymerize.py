@@ -20,7 +20,7 @@ def polymerize(url, parseQuery):
         if dropPair(k, v, url): i += 1; continue;
         if dropItem(k): continue
         keysPath.append(k)
-    #if len(keysPath) > 4: keysPath = keysPath[0:4]
+    if len(keysPath) > 6: keysPath = keysPath[0:6]
 
     if parseQuery:
         kvs = urlparse.parse_qsl(info.query)
@@ -29,7 +29,8 @@ def polymerize(url, parseQuery):
             if dropPair(kv[0], kv[1], info.path) or dropItem(kv[0]): continue;
             kvStr = '%s=%s' % (kv[0], valueAbstract(kv[1]))
             keysQuery.append(kvStr)
-    #if len(keysQuery) > 4: keysQuery = keysQuery[0:4]
+    pickNum = min(6, 8 - len(keysPath))
+    if len(keysQuery) > pickNum: keysQuery = keysQuery[0:pickNum]
     keysQuery.sort()
 
     hostname = info.hostname.replace('51fanli', 'fanli')
@@ -84,7 +85,7 @@ def dropItem(k):
     return drop
 
 if '__main__' == __name__: 
-    csvFile = '/usr/local/workdata/exchange/kafka-path-1000.csv'
+    csvFile = '/usr/local/workdata/exchange/kafka-path-all.csv'
     # 是否解析querystring
     parseQuery = (len(sys.argv) == 2 and '1' == sys.argv[1])
 
