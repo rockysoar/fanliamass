@@ -40,9 +40,8 @@ def polymerize(url, parseQuery):
     return urlCode.strip(' /?')
 
 def valueAbstract(value):
-    if re.search(r'^[\d\.,;]+$', value): return '%d'
-    if re.search(r'^[\w\.,;-]+$', value): return '%s'
-    return '%s' # mixed
+    if re.search(r'^[\d,;]+$', value): return '%d'
+    return '%s'
 
 def dropPair(k, v, path= ''):
     drop = False
@@ -64,18 +63,22 @@ def dropPair(k, v, path= ''):
 
 def dropItem(k):
     drop = False
-    drop = drop or 'index.php' == k
+    k = k.lower()
+    if (re.search(r'\.(php5?|htm|html5?|do|jsp|asp)$', k)):
+        return False
+
     drop = drop or not re.search(r'^[a-zA-Z_]\w{1,24}$', k)
     drop = drop or re.search(r'^c_(?:src|v|nt|aver)$', k)
     drop = drop or re.search(r'^\w+_(?:asc|desc)$', k)
     #http://zhide.fanli.com/p{N}分页参数
-    drop = drop or re.search(r'^p\d+$', k, re.IGNORECASE)
+    drop = drop or re.search(r'^p\d+$', k)
     if drop: return drop
 
     # 数字字母混杂
     numTimes = re.findall(r'(\d+)', k)
     numCount = sum(c.isdigit() for c in k)
     numRate = numCount/len(k)
+    #16进制字符串数字比例一般为0.625 上下浮动0.05
     drop = drop or (len(numTimes) >= 2 and numRate >= .575 and numRate <= .675)
 
     return drop
