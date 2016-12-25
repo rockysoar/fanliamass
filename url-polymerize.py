@@ -11,43 +11,53 @@ def polymerize(url, parseQuery):
     info = urlparse.urlparse(url)
     if not info.hostname: return
 
-    keys_ = []; 
+    keysPath, keysQuery = [], [] 
     keys = re.split(r'/|-', info.path)
     for i in range(len(keys)):
         k = keys[i]
-        if i == len(keys) - 1: v = ''
-        else: v = keys[i+1]
+        v = '' if i == len(keys) - 1 else keys[i+1]
 
         if dropPair(k, v, url): i += 1; continue;
         if dropItem(k): continue
-        keys_.append(k)
+        keysPath.append(k)
+    #if len(keysPath) > 4: keysPath = keysPath[0:4]
 
     if parseQuery:
         kvs = urlparse.parse_qsl(info.query)
         for kv in kvs:
             if not kv: continue
-            if dropPair(kv[0], kv[1], url) or dropItem(kv[0]): continue;
-            keys_.append(kv[0])
+            if dropPair(kv[0], kv[1], info.path) or dropItem(kv[0]): continue;
+            kvStr = '%s=%s' % (kv[0], valueAbstract(kv[1]))
+            keysQuery.append(kvStr)
+    #if len(keysQuery) > 4: keysQuery = keysQuery[0:4]
+    keysQuery.sort()
 
-    if len(keys_) > 8: keys_ = keys_[0:8]
     hostname = info.hostname.replace('51fanli', 'fanli')
-    urlCode = "%s/%s" % (hostname, '.'.join(keys_).strip('.'))
-    return urlCode.strip(' /')
+    path = '/'.join(keysPath).strip('/')
+    query = '&'.join(keysQuery).strip('&')
 
-def dropPair(k, v, url = ''):
+    urlCode = "%s/%s?%s" % (hostname, path, query)
+    return urlCode.strip(' /?')
+
+def valueAbstract(value):
+    if re.search(r'^[\d\.,;]+$', value): return '%d'
+    if re.search(r'^[\w\.,;-]+$', value): return '%s'
+    return '%s' # mixed
+
+def dropPair(k, v, path= ''):
     drop = False
     k = k.lower()
     drop = drop or (type(v) != str)
     drop = drop or re.search(r'[\w\-\.~=]{31,}', v)
     drop = drop or (re.search(r'^(?:c_)?nt$', k) and re.search(r'^(?:wifi|cell)$', v))
     drop = drop or (k in ['jsoncallback', 'spm', 'lc', '_t_t_t', 't', '_t', '__', '_', 'abtest'])
-    drop = drop or ((k in ['size', 'psize', 'page_size', 'pagesize', 'psize', 'page', 'p', 't']) and re.search(r'^\d*$', v))
+    drop = drop or ((k in ['size', 'psize', 'page_size', 'pagesize', 'psize', 'page', 'pidx', 'p', 't']) and re.search(r'^[\d-]*$', v))
     drop = drop or ('size' == k and (v in ['small', 'big']))
-    drop = drop or re.search(r'^a?sort$', k) and re.search(r'sort|default|asc|des', v, re.IGNORECASE)
-    drop = drop or (k in ['verify_code', 'app_ref', 'deviceno', 'device_no', 'devid', 'msg', 'security_id'] and re.search(r'^\w{12,}', v))
+    drop = drop or re.search(r'^a?sort$', k) and re.search(r'\s*|sort|default|asc|des', v, re.IGNORECASE)
+    drop = drop or (k in ['verify_code', 'app_ref', 'deviceno', 'device_no', 'deviceid', 'devid', 'msg', 'security_id'] and re.search(r'^\w{12,}', v))
     drop = drop or re.search(r'(start|end)_price', k) and v.isdigit()
     drop = drop or re.search(r'https?://', v)
-    drop = drop or re.search(r'keywords?', k) and re.search(r'search', url)
+    drop = drop or re.search(r'^(start|offset|limit)$', k) and re.search(r'search', path)
 
     return drop
 
@@ -70,7 +80,7 @@ def dropItem(k):
     return drop
 
 if '__main__' == __name__: 
-    csvFile = '/usr/local/workdata/exchange/kafka-path-all.csv'
+    csvFile = '/usr/local/workdata/exchange/kafka-path-1000.csv'
     # 是否解析querystring
     parseQuery = (len(sys.argv) == 2 and '1' == sys.argv[1])
 
