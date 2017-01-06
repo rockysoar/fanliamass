@@ -2,6 +2,7 @@
 
 import sys, re, urlparse
 
+########## URL聚合 #########
 def polymerize(url, parseQuery):
     url = url.strip(' "\'\r\n\t')
     if not url: return 
@@ -47,14 +48,16 @@ def dropPair(k, v, path= ''):
     drop = False
     k = k.lower()
     drop = drop or (type(v) != str)
-    drop = drop or re.search(r'[\w\-\.~=]{31,}', v)
-    drop = drop or (re.search(r'^(?:c_)?nt$', k) and re.search(r'^(?:wifi|cell)$', v))
-    drop = drop or (k in ['jsoncallback', 'spm', 'lc', '_t_t_t', 't', '_t', '__', '_', 'abtest'])
-    drop = drop or ((k in ['size', 'psize', 'page_size', 'pagesize', 'psize', 'page', 'pidx', 'p', 't']) and re.search(r'^[\d-]*$', v))
+    drop = drop or len(v) == 0 or len(v) > 24
+    drop = drop or re.search(r'^(?:c_)?nt$', k) and re.search(r'^(?:wifi|cell)$', v)
+    drop = drop or k in ['jsoncallback', 'spm', 'lc', '_t_t_t', 't', '_t', '__', '_', 'abtest']
+    drop = drop or k in ['size', 'psize', 'page_size', 'pagesize', 'psize', 'page', 'pidx', 'p', 't'] and re.search(r'^[\d-]*$', v)
     drop = drop or ('size' == k and (v in ['small', 'big']))
-    drop = drop or re.search(r'^a?sort$', k) and re.search(r'\s*|sort|default|asc|des', v, re.IGNORECASE)
-    drop = drop or (k in ['verify_code', 'app_ref', 'deviceno', 'device_no', 'deviceid', 'devid', 'msg', 'security_id'] and re.search(r'^\w{12,}', v))
+    drop = drop or re.search(r'^a?sort$', k) and re.search(r'sort|default|asc|des', v, re.IGNORECASE)
+    drop = drop or k in ['verify_code', 'app_ref', 'deviceno', 'device_no', 'deviceid', 'devid', 'msg', 'security_id'] and re.search(r'^\w{12,}', v)
     drop = drop or re.search(r'(start|end)_price', k) and v.isdigit()
+    drop = drop or re.search(r'time', k) and re.search(r'\d{10}|0', v)
+    drop = drop or k in ['ajax'] and v.isdigit()
     drop = drop or re.search(r'https?://', v)
     drop = drop or re.search(r'^(start|offset|limit)$', k) and re.search(r'search', path)
     drop = drop or re.search(r'^utm_.*$', k) and len(v) > 12
@@ -83,3 +86,7 @@ def dropItem(k):
 
     return drop
 
+
+########## 身份信息提取 ##########
+def identity_picker(path, ip, utmo):
+    pass
