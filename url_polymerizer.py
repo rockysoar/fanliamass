@@ -1,4 +1,3 @@
-#!python
 # -*- coding: utf-8 -*-
 
 import sys, re, urlparse
@@ -83,22 +82,4 @@ def dropItem(k):
     drop = drop or (len(numTimes) >= 2 and numRate >= .575 and numRate <= .675)
 
     return drop
-
-if '__main__' == __name__: 
-    csvFile = '/usr/local/workdata/exchange/kafka-path-all.csv'
-    # 是否解析querystring
-    parseQuery = (len(sys.argv) == 2 and '1' == sys.argv[1])
-
-    f = open(csvFile, 'r')
-    urlCodes = {}
-    for url in f:
-        urlCode = polymerize(url, parseQuery)
-        if not urlCode: continue
-
-        if not urlCodes.get(urlCode): urlCodes[urlCode] = 1
-        else: urlCodes[urlCode] += 1
-
-    for k in urlCodes.items(): print k
-    print len(urlCodes)
-    f.close()
 
