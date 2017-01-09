@@ -5,20 +5,20 @@ import sys
 import url_polymerizer as polymerizer
 
 if '__main__' == __name__: 
-    csvFile = '/usr/local/workdata/exchange/kafka-path-1000.csv'
+    csvFile = '/usr/local/workdata/exchange/kafka-ocp.csv'
     # 是否解析querystring
-    parseQuery = (len(sys.argv) == 2 and '1' == sys.argv[1])
+    parseQuery = (len(sys.argv) > 1 and '1' == sys.argv[1])
 
     f = open(csvFile, 'r')
-    urlCodes = {}
+    urlRules = {}
     for url in f:
-        urlCode = polymerizer.polymerize(url, parseQuery)
-        if not urlCode: continue
+        urlRule = polymerizer.polymerize(url, parseQuery)
+        if not urlRule: continue
 
-        if not urlCodes.get(urlCode): urlCodes[urlCode] = 1
-        else: urlCodes[urlCode] += 1
+        if not urlRules.get(urlRule): urlRules[urlRule] = 1
+        else: urlRules[urlRule] += 1
 
-    for k in urlCodes.items(): print k
-    print len(urlCodes)
+    for k in urlRules.items(): print k
+    print len(urlRules)
     f.close()
 

@@ -6,10 +6,10 @@ import sys, re, urlparse
 def polymerize(url, parseQuery):
     url = url.strip(' "\'\r\n\t')
     if not url: return 
-    if re.search(r'\.(?:js|css|ico|png|jpg)', url): return
 
     info = urlparse.urlparse(url)
     if not info.hostname: return
+    if re.search(r'\.(?:js|css|ico|png|jpe?g)', info.path): return
 
     keysPath, keysQuery = [], [] 
     keys = re.split(r'/|-', info.path)
@@ -33,7 +33,7 @@ def polymerize(url, parseQuery):
     if len(keysQuery) > pickNum: keysQuery = keysQuery[0:pickNum]
     keysQuery.sort()
 
-    hostname = info.hostname.replace('51fanli', 'fanli')
+    hostname = polymerizeHostname(info.hostname)
     path = '/'.join(keysPath).strip('/')
     query = '&'.join(keysQuery).strip('&')
 
@@ -49,6 +49,8 @@ def dropPair(k, v, path= ''):
     k = k.lower()
     drop = drop or (type(v) != str)
     drop = drop or len(v) == 0 or len(v) > 24
+    # ocp图片处理接口
+    drop = drop or re.search(r'/ocp/', path)
     drop = drop or re.search(r'^(?:c_)?nt$', k) and re.search(r'^(?:wifi|cell)$', v)
     drop = drop or k in ['jsoncallback', 'spm', 'lc', '_t_t_t', 't', '_t', '__', '_', 'abtest']
     drop = drop or k in ['size', 'psize', 'page_size', 'pagesize', 'psize', 'page', 'pidx', 'p', 't'] and re.search(r'^[\d-]*$', v)
@@ -85,6 +87,11 @@ def dropItem(k):
     drop = drop or (len(numTimes) >= 2 and numRate >= .575 and numRate <= .675)
 
     return drop
+
+def polymerizeHostname(hostname):
+    hostname = hostname.replace('51fanli', 'fanli')
+    hostname = re.sub('l\d+', 'l%d', hostname)
+    return hostname
 
 
 ########## 身份信息提取 ##########
