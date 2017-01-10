@@ -62,7 +62,7 @@ def dropPair(k, v, path = '', degree = 3):
     # ocp图片处理
     drop = drop or re.search(r'/ocp/', path)
     # 图片大小
-    drop = drop or re.search(r'\d+(?:x|\*)\d+', v)
+    drop = drop or re.search(r'\d+(?:x|\*)\d*', v) or re.search(r'\d*(?:x|\*)\d+', v)
     # 网络类型
     drop = drop or re.search(r'^(?:c_)?nt$', k) and re.search(r'^(?:wifi|cell)$', v)
     # 追踪信息
