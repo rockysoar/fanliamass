@@ -6,13 +6,15 @@ import url_polymerizer as polymerizer
 
 if '__main__' == __name__: 
     csvFile = '/usr/local/workdata/exchange/kafka-ocp.csv'
-    # 是否解析querystring
-    parseQuery = (len(sys.argv) > 1 and '1' == sys.argv[1])
+    # 聚合度
+    degree = sys.argv[1] if len(sys.argv) > 1 else '3'
+    degree = int(degree)
+    if degree not in [1, 2, 3]: degree = 3;
 
     f = open(csvFile, 'r')
     urlRules = {}
     for url in f:
-        urlRule = polymerizer.polymerize(url, parseQuery)
+        urlRule = polymerizer.polymerize(url, degree)
         if not urlRule: continue
 
         if not urlRules.get(urlRule): urlRules[urlRule] = 1
