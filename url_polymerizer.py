@@ -20,7 +20,7 @@ def polymerize(url, degree = 3):
     # 处理pathinfo
     for i in range(len(keys)):
         k = keys[i]
-        v = '' if i == len(keys) - 1 else keys[i+1]
+        v = k if i == len(keys) - 1 else keys[i+1]
 
         if dropPair(k, v, info.path, degree): i += 1; continue;
         if dropItem(k): continue
@@ -46,7 +46,7 @@ def polymerize(url, degree = 3):
     query = '&'.join(keysQuery).strip('&')
 
     urlCode = "%s/%s?%s" % (hostname, path, query)
-    return urlCode.strip(' /?')
+    return urlCode.lower().strip(' /?')
 
 def valueAbstract(value):
     if re.search(r'^[\d,;]+$', value): return '%d'
@@ -88,7 +88,7 @@ def dropItem(k):
     if (re.search(r'\.(php5?|htm|html5?|do|jsp|asp)$', k)):
         return False
 
-    drop = drop or not re.search(r'^[a-z]\w{0,23}$', k, re.I)
+    drop = drop or not re.search(r'^[a-z]\w{0,23}$', k)
     drop = drop or re.search(r'^c_(?:src|v|nt|aver)$', k)
     drop = drop or re.search(r'^\w+_(?:asc|desc)$', k)
     #http://zhide.fanli.com/p{N}分页参数
