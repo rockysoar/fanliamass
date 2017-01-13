@@ -68,7 +68,8 @@ def dropPair(k, v, path = '', degree = 3):
     # 追踪信息
     drop = drop or k in ['jsoncallback', 'spm', 'lc', '_t_t_t', 't', '_t', '__', '_', 'abtest']
     # 页码
-    drop = drop or k in ['size', 'psize', 'page_size', 'pagesize', 'psize', 'page', 'pidx', 'p', 't'] and re.search(r'^[\d-]*$', v)
+    drop = drop or k in ['size', 'psize', 'page_size', 'pagesize', 'psize', 'page', 'pidx', 'p', 't'] and re.search(r'^[\.\d-]*$', v)
+    drop = drop or re.search('page', k) and re.search(r'^[\d-]*$', v)
     drop = drop or ('size' == k and (v in ['small', 'big']))
     # 排序
     drop = drop or re.search(r'^a?sort$', k) and re.search(r'sort|default|asc|des', v, re.I)
