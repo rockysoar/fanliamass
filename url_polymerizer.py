@@ -32,7 +32,8 @@ def polymerize(url, degree = 3):
         kvs = urlparse.parse_qsl(info.query)
         for kv in kvs:
             if not kv: continue
-            if dropPair(kv[0], kv[1], info.path, degree) or dropItem(kv[0]): continue;
+            if keepPair(kv[0], kv[1], info.path): pass
+            elif dropPair(kv[0], kv[1], info.path, degree) or dropItem(kv[0]): continue;
             kvStr = '%s=%s' % (kv[0], valueAbstract(kv[1]))
             keysQuery.append(kvStr)
         # 去重
@@ -66,10 +67,10 @@ def dropPair(k, v, path = '', degree = 3):
     # 网络类型
     drop = drop or re.search(r'^(?:c_)?nt$', k) and re.search(r'^(?:wifi|cell)$', v)
     # 追踪信息
-    drop = drop or k in ['jsoncallback', 'spm', 'lc', '_t_t_t', 't', '_t', '__', '_', 'abtest']
+    drop = drop or k in ['jsoncallback', 'callback', 'spm', 'lc', '_t_t_t', 't', '_t', '__', '_', 'abtest', 'v']
     # 页码
     drop = drop or k in ['size', 'psize', 'page_size', 'pagesize', 'psize', 'page', 'pidx', 'p', 't'] and re.search(r'^[\.\d-]*$', v)
-    drop = drop or re.search('page', k) and re.search(r'^[\d-]*$', v)
+    drop = drop or re.search('page|limit|offset', k) and re.search(r'^[\d-]*$', v)
     drop = drop or ('size' == k and (v in ['small', 'big']))
     # 排序
     drop = drop or re.search(r'^a?sort$', k) and re.search(r'sort|default|asc|des', v, re.I)
@@ -82,6 +83,11 @@ def dropPair(k, v, path = '', degree = 3):
     drop = drop or re.search(r'^utm_.*$', k) and len(v) > 12
 
     return drop
+
+def keepPair(k, v, path = '', degree = 3):
+    keep = False
+    keep = keep or 'api' == k
+    return keep 
 
 def dropItem(k):
     drop = False
