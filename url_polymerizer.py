@@ -113,7 +113,8 @@ def dropItem(k):
 
 def polymerizeHostname(hostname):
     hostname = hostname.replace('51fanli', 'fanli')
-    hostname = re.sub('l\d+', 'l%d', hostname)
+    hostname = re.sub('^l\d+\.', 'l%d.', hostname)
+    hostname = re.sub('^\d+\.wx', '%d.wx', hostname)
     return hostname
 
 
