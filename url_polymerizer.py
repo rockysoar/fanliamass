@@ -13,16 +13,14 @@ def polymerize(url, degree = 3):
 
     info = urlparse.urlparse(url)
     if not info.hostname: return
-    if re.search(r'\.(?:js|css|ico|png|jpe?g)', info.path): return
+    if re.search(r'\.(?:js|css|ico|png|jpe?g|g?zip|xml|apk)', info.path, re.I): return
 
     keysPath, keysQuery = [], [] 
     keys = re.split(r'/|-', info.path)
     # 处理pathinfo
     for i in range(len(keys)):
         k = keys[i]
-        v = k if i == len(keys) - 1 else keys[i+1]
 
-        if dropPair(k, v, info.path, degree): i += 1; continue;
         if dropItem(k): continue
         keysPath.append(k)
     if len(keysPath) > 6: keysPath = keysPath[0:6]
@@ -67,7 +65,7 @@ def dropPair(k, v, path = '', degree = 3):
     # 网络类型
     drop = drop or re.search(r'^(?:c_)?nt$', k) and re.search(r'^(?:wifi|cell)$', v)
     # 追踪信息
-    drop = drop or k in ['jsoncallback', 'callback', 'spm', 'lc', '_t_t_t', 't', '_t', '__', '_', 'abtest', 'v']
+    drop = drop or k in ['jsoncallback', 'callback', 'spm', 'lc', '_t_t_t', 't', '_t', '__', '_', 'abtest', 'v', 'mc']
     # 页码
     drop = drop or k in ['size', 'psize', 'page_size', 'pagesize', 'psize', 'page', 'pidx', 'p', 't'] and re.search(r'^[\.\d-]*$', v)
     drop = drop or re.search('page|limit|offset', k) and re.search(r'^[\d-]*$', v)
@@ -98,6 +96,13 @@ def dropItem(k):
     drop = drop or not re.search(r'^[a-z]\w{0,23}$', k)
     drop = drop or re.search(r'^c_(?:src|v|nt|aver)$', k)
     drop = drop or re.search(r'^\w+_(?:asc|desc)$', k)
+    drop = drop or k in ['jsoncallback', 'callback', 'spm', 'lc', '_t_t_t', 't', '_t', '__', '_', 'abtest', 'v', 'ajax', 'mc']
+    drop = drop or k in ['size', 'psize', 'page_size', 'pagesize', 'psize', 'page', 'pidx', 'p', 't', 'offset', 'limit', 'small'] 
+    drop = drop or k in ['verify_code', 'app_ref', 'deviceno', 'device_no', 'deviceid', 'devid', 'msg', 'security_id']
+    # 排序
+    drop = drop or re.search(r'^a?sort$', k)
+    drop = drop or re.search(r'^utm_.*$', k)
+
     #http://zhide.fanli.com/p{N}分页参数
     drop = drop or re.search(r'^p\d+$', k)
     if drop: return drop
