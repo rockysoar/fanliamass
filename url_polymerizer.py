@@ -7,7 +7,7 @@ import sys, re, urlparse
 # 1: 低 pathinfo + querystring
 # 2: 中 pathinfo + querystring, 仅保留符合PHP变量命名规则的关键词
 # 3: 高 pathinfo, 仅保留符合PHP变量命名规则的关键词
-def polymerize(url, degree = 3):
+def polymerize(url, degree = 2):
     url = url.strip(' "\'\r\n\t')
     if not url: return 
 
@@ -51,7 +51,7 @@ def valueAbstract(value):
     if re.search(r'^[\d,;]+$', value): return '%d'
     return '%s'
 
-def dropPair(k, v, path = '', degree = 3):
+def dropPair(k, v, path = '', degree = 2):
     drop = False
     k = k.lower()
     drop = drop or (type(v) != str)
@@ -82,7 +82,7 @@ def dropPair(k, v, path = '', degree = 3):
 
     return drop
 
-def keepPair(k, v, path = '', degree = 3):
+def keepPair(k, v, path = '', degree = 2):
     keep = False
     keep = keep or 'api' == k
     return keep 
