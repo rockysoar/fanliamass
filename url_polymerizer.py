@@ -84,7 +84,7 @@ def dropPair(k, v, path = '', degree = 2):
 
 def keepPair(k, v, path = '', degree = 2):
     keep = False
-    keep = keep or 'api' == k
+    keep = keep or k in ['api', 'method']
     return keep 
 
 def dropItem(k):
@@ -96,7 +96,7 @@ def dropItem(k):
     drop = drop or not re.search(r'^[a-z]\w{0,23}$', k)
     drop = drop or re.search(r'^c_(?:src|v|nt|aver)$', k)
     drop = drop or re.search(r'^\w+_(?:asc|desc)$', k)
-    drop = drop or k in ['jsoncallback', 'callback', 'spm', 'lc', '_t_t_t', 't', '_t', '__', '_', 'abtest', 'v', 'ajax', 'mc']
+    drop = drop or k in ['null', 'jsoncallback', 'callback', 'spm', 'lc', '_t_t_t', 't', '_t', '__', '_', 'abtest', 'v', 'ajax', 'mc']
     drop = drop or k in ['size', 'psize', 'page_size', 'pagesize', 'psize', 'page', 'pidx', 'p', 't', 'offset', 'limit', 'small'] 
     drop = drop or k in ['verify_code', 'app_ref', 'deviceno', 'device_no', 'deviceid', 'devid', 'msg', 'security_id']
     # 排序
@@ -108,11 +108,13 @@ def dropItem(k):
     if drop: return drop
 
     # 数字字母混杂
-    numTimes = re.findall(r'(\d+)', k)
+    numTimes = re.findall(r'(\d+|[a-z]+)', k)
+    drop = drop or len(numTimes) >= 3
+
     numCount = sum(c.isdigit() for c in k)
-    numRate = numCount/len(k)
-    #16进制字符串数字比例一般为0.625 上下浮动0.05
-    drop = drop or (len(numTimes) >= 2 and numRate >= .575 and numRate <= .675)
+    numRate = float(numCount)/len(k)
+    #16进制字符串数字比例一般为0.625 上下浮动
+    drop = drop or (len(k) > 3 and numRate >= .5 and numRate <= .75)
 
     return drop
 
@@ -120,9 +122,9 @@ def polymerizeHostname(hostname):
     hostname = hostname.replace('51fanli', 'fanli')
     hostname = re.sub('^l\d+\.', 'l%d.', hostname)
     hostname = re.sub('^\d+\.wx', '%d.wx', hostname)
+
+    match = re.match(r'((\d+\.){3})\d+', hostname)
+    if match: hostname = '%s%s' % (match.group(1), '%d')
+
     return hostname
 
-
-########## 身份信息提取 ##########
-def identity_picker(path, ip, utmo):
-    pass
