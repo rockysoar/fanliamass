@@ -14,12 +14,15 @@ if [ $? -ne 0 ]; then
 fi
 
 while read changedfile; do
-    $PY inspector_syntax.py "$changedfile"
-    
-    $PY inspector_encoding.py "$changedfile"
+    ERR=$($PY inspector_encoding.py "$REPOS" "$changedfile")
+    if [ $? -ne 0 ]; then
+        echo "$ERR" >&2
+        exit 1
+    fi
 done <<< $($SVNLOOK changed "$REPOS")
 
 while read changedline; do
-    $PY inspector_pear_cs.py "$REPOS"
+    echo 1
+    #$PY inspector_pear_cs.py "$REPOS"
 done <<< $($SVNLOOK diff "$REPOS")
 
