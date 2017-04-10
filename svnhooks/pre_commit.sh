@@ -6,16 +6,20 @@ TXN="$2"
 SVNLOOK=/usr/bin/svnlook  
 PY=/usr/bin/python
 
-MSG=$($SVNLOOK log -t "$TXN" "$REPOS")  
-$PY inspector_message.py "$MSG"
+MSG=$($SVNLOOK log "$REPOS")  
+ERR=$($PY inspector_message.py "$MSG")
+if [ $? -ne 0 ]; then
+    echo "$ERR" >&2
+    exit 1
+fi
 
 while read changedfile; do
     $PY inspector_syntax.py "$changedfile"
     
     $PY inspector_encoding.py "$changedfile"
-done <<< $($SVNLOOK changed -t "$TXN" "$REPOS")
+done <<< $($SVNLOOK changed "$REPOS")
 
 while read changedline; do
-    $PY inspector_pear_cs.py "$TXN" "$REPOS"
-done <<< $($SVNLOOK diff -t "$TXN" "$REPOS")
+    $PY inspector_pear_cs.py "$REPOS"
+done <<< $($SVNLOOK diff "$REPOS")
 
