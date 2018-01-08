@@ -11,6 +11,9 @@ if [[ '' == $PROJ || ! -d $PROJ || 'h' == ${PROJ:0:1} ]]; then
     exit 255
 fi
 
+# 匹配：
+# 1：特定标签中的http资源，
+# 2：或ThinkPHP模板写法中加载变量而变量未进行fsdk_fit_scheme处理的资源
 UNSAFE_IMG='<img.*?src=("|\0x27)?(http:|\{\$.+(?<!\|fsdk_fit_scheme))'
 UNSAFE_LINK='<link.*?href=("|\0x27)?(http:|\{\$.+(?<!\|fsdk_fit_scheme))'
 UNSAFE_SCRIPT='<script*?src=("|\0x27)?(http:|\{\$.+(?<!\|fsdk_fit_scheme))'
