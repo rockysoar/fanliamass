@@ -14,12 +14,12 @@ fi
 # 匹配：
 # 1：特定标签中的http资源，
 # 2：或ThinkPHP模板写法中加载变量而变量未进行fsdk_fit_scheme处理的资源
-UNSAFE_IMG='<img.*?src=("|\0x27)?(http:|\{\$.+(?<!\|fsdk_fit_scheme))'
-UNSAFE_LINK='<link.*?href=("|\0x27)?(http:|\{\$.+(?<!\|fsdk_fit_scheme))'
-UNSAFE_SCRIPT='<script*?src=("|\0x27)?(http:|\{\$.+(?<!\|fsdk_fit_scheme))'
+UNSAFE_IMG='<img.+?src=("|\0x27)?(http:|\{\$.+(?<!\|fsdk_fit_scheme)\})'
+UNSAFE_LINK='<link.+?href=("|\0x27)?(http:|\{\$.+(?<!\|fsdk_fit_scheme)\})'
+UNSAFE_SCRIPT='<script.+?src=("|\0x27)?(http:|\{\$.+(?<!\|fsdk_fit_scheme)\})'
 
 function func_grep () {
-    grep -nE "$1" \
+    \grep -nP "$1" \
         --include=*.php --include=*.htm --include=*.html --include=*.html5 \
         --exclude-dir=.svn \
         -r $2
