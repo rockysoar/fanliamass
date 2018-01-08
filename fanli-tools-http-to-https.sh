@@ -30,14 +30,15 @@ if [[ $OUTPUTSTYLE = "" || $OUTPUTSTYLE = "1" ]]; then
     func_grep "($UNSAFE_IMG|$UNSAFE_LINK|$UNSAFE_SCRIPT)" "$PROJ"
 elif [[ $OUTPUTSTYLE != "1" ]]; then
     func_grep "($UNSAFE_IMG|$UNSAFE_LINK|$UNSAFE_SCRIPT)" "$PROJ" | \
-        awk -F':' '{
+        gawk -F':' '{
             if(!($1 in arr)) {
                 arr[$1] = 1
                 print "==== "$1" ===="
             }
-            $1 = ""
-            print $0
+            for(i=2; i<NF; i++) {
+                printf $i":"
+            }
+            print $NF
         }'
 fi
-
 
