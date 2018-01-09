@@ -17,19 +17,21 @@ fi
 UNSAFE_IMG='<img.+?src=("|\0x27)?(http:|\{\$.+(?<!\|fsdk_fit_scheme)\})'
 UNSAFE_LINK='<link.+?href=("|\0x27)?(http:|\{\$.+(?<!\|fsdk_fit_scheme)\})'
 UNSAFE_SCRIPT='<script.+?src=("|\0x27)?(http:|\{\$.+(?<!\|fsdk_fit_scheme)\})'
+UNSAFE_BACKGROUNd='background(-image)?:.*?url\(("|\0x27)?http:\)'
+UNSAFE_JS_SOURCE='^(?!\s*(\/|\*)).*?("|\0x27)?http:'
 
 function func_grep () {
     \grep -nP "$1" \
-        --include=*.php --include=*.htm --include=*.html --include=*.html5 \
+        --include=*.php --include=*.htm --include=*.html --include=*.html5 --include=*.css --include=*.js \
         --exclude-dir=.svn \
         -r $2
         #--color=auto \
 }
 
 if [[ $OUTPUTSTYLE = "" || $OUTPUTSTYLE = "1" ]]; then
-    func_grep "($UNSAFE_IMG|$UNSAFE_LINK|$UNSAFE_SCRIPT)" "$PROJ"
+    func_grep "($UNSAFE_IMG|$UNSAFE_LINK|$UNSAFE_SCRIPT|$UNSAFE_BACKGROUNd|$UNSAFE_JS_SOURCE)" "$PROJ"
 elif [[ $OUTPUTSTYLE != "1" ]]; then
-    func_grep "($UNSAFE_IMG|$UNSAFE_LINK|$UNSAFE_SCRIPT)" "$PROJ" | \
+    func_grep "($UNSAFE_IMG|$UNSAFE_LINK|$UNSAFE_SCRIPT|$UNSAFE_BACKGROUNd|$UNSAFE_JS_SOURCE)" "$PROJ" | \
         gawk -F':' '{
             if(!($1 in arr)) {
                 arr[$1] = 1
