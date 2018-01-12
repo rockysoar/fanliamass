@@ -17,7 +17,7 @@ fi
 UNSAFE_HTML_IMG='<img.+?src\s*=\s*("|\0x27)?(http:|\{\$.+(?<!\|fsdk_fit_scheme)\})'
 UNSAFE_HTML_LINK='<link.+?href\s*=\s*("|\0x27)?(http:|\{\$.+(?<!\|fsdk_fit_scheme)\})'
 UNSAFE_HTML_SCRIPT='<script.+?src\s*=\s*("|\0x27)?(http:|\{\$.+(?<!\|fsdk_fit_scheme)\})'
-UNSAFE_CSS_BACKGROUND='background(-image)?\s*:.*?url\(("|\0x27)?http:\/\/'
+UNSAFE_CSS_BACKGROUND='background(-image)?\s*:.*?url\(("|\0x27)?(http:|\{\$.+(?<!\|fsdk_fit_scheme)\})'
 # match "http://xxx" that not commented out
 UNSAFE_JS_SOURCE='^(?!\s*(\/|\*)).*?("|\0x27)?http:\/\/'
 
