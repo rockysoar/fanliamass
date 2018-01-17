@@ -45,7 +45,7 @@ def polymerize(url, degree = 2):
     query = '&'.join(keysQuery).strip('&')
 
     urlCode = "%s/%s?%s" % (hostname, path, query)
-    return urlCode.lower().strip(' /?')
+    return urlCode.strip(' /?')
 
 def valueAbstract(value):
     if re.search(r'^[\d,;]+$', value): return '%d'
@@ -53,17 +53,16 @@ def valueAbstract(value):
 
 def dropPair(k, v, path = '', degree = 2):
     drop = False
-    k = k.lower()
     drop = drop or (type(v) != str)
-    drop = drop or (len(v) < 3 or len(v) > 24)
+    drop = drop or (len(v) < 3 or len(v) > 31)
     # 中度聚合
     drop = drop or (2 == degree and re.search(r'^[a-z]\w{2,23}$', v, re.I) is None)
     # ocp图片处理
     drop = drop or re.search(r'/ocp/', path)
     # 图片大小
-    drop = drop or re.search(r'\d+(?:x|\*)\d*', v) or re.search(r'\d*(?:x|\*)\d+', v)
+    drop = drop or re.search(r'\d+(?:x|\*)\d*', v, re.I) or re.search(r'\d*(?:x|\*)\d+', v, re.I)
     # 网络类型
-    drop = drop or re.search(r'^(?:c_)?nt$', k) and re.search(r'^(?:wifi|cell)$', v)
+    drop = drop or re.search(r'^(?:c_)?nt$', k, re.I) and re.search(r'^(?:wifi|cell)$', v, re.I)
     # 追踪信息
     drop = drop or k in ['jsoncallback', 'callback', 'spm', 'lc', '_t_t_t', 't', '_t', '__', '_', 'abtest', 'v', 'mc']
     # 页码
@@ -77,8 +76,8 @@ def dropPair(k, v, path = '', degree = 2):
     drop = drop or re.search(r'time', k) and re.search(r'\d{10}|0', v)
     drop = drop or k in ['ajax'] and v.isdigit()
     drop = drop or re.search(r'^http', v)
-    drop = drop or re.search(r'^(start|offset|limit)$', k) and re.search(r'search', path)
-    drop = drop or re.search(r'^utm_.*$', k) and len(v) > 12
+    drop = drop or re.search(r'^(start|offset|limit)$', k, re.I) and re.search(r'search', path, re.I)
+    drop = drop or re.search(r'^utm_.*$', k, re.I) and len(v) > 12
 
     return drop
 
@@ -89,22 +88,21 @@ def keepPair(k, v, path = '', degree = 2):
 
 def dropItem(k):
     drop = False
-    k = k.lower()
-    if (re.search(r'\.(php5?|htm|html5?|do|jsp|asp)$', k)):
+    if (re.search(r'\.(php5?|htm|html5?|do|jsp|asp)$', k, re.I)):
         return False
 
-    drop = drop or not re.search(r'^[a-z]\w{0,23}$', k)
-    drop = drop or re.search(r'^c_(?:src|v|nt|aver)$', k)
-    drop = drop or re.search(r'^\w+_(?:asc|desc)$', k)
+    drop = drop or not re.search(r'^[a-z]\w{0,23}$', k, re.I)
+    drop = drop or re.search(r'^c_(?:src|v|nt|aver)$', k, re.I)
+    drop = drop or re.search(r'^\w+_(?:asc|desc)$', k, re.I)
     drop = drop or k in ['null', 'jsoncallback', 'callback', 'spm', 'lc', '_t_t_t', 't', '_t', '__', '_', 'abtest', 'v', 'ajax', 'mc']
     drop = drop or k in ['size', 'psize', 'page_size', 'pagesize', 'psize', 'page', 'pidx', 'p', 't', 'offset', 'limit', 'small'] 
     drop = drop or k in ['verify_code', 'app_ref', 'deviceno', 'device_no', 'deviceid', 'devid', 'msg', 'security_id']
     # 排序
-    drop = drop or re.search(r'^a?sort$', k)
-    drop = drop or re.search(r'^utm_.*$', k)
+    drop = drop or re.search(r'^a?sort$', k, re.I)
+    drop = drop or re.search(r'^utm_.*$', k, re.I)
 
     #http://zhide.fanli.com/p{N}分页参数
-    drop = drop or re.search(r'^p\d+$', k)
+    drop = drop or re.search(r'^p\d+$', k, re.I)
     if drop: return drop
 
     # 数字字母混杂
