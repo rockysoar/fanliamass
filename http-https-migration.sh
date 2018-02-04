@@ -20,18 +20,19 @@ UNSAFE_HTML_SCRIPT='<script.+?src\s*=\s*("|\0x27)?(http:|\{\$[^}]+(?<!\|fsdk_fit
 UNSAFE_CSS_BACKGROUND='background(-image)?\s*:.*?url\(("|\0x27)?http:\/\/'
 # match "http://xxx" that not commented out
 UNSAFE_JS_SOURCE='^(?!\s*(\/|\*)).*?("|\0x27)?http:\/\/'
+UNSAFE_HTML_FORM='<form.+?action\s*=\s*("|\0x27)?http:\/\/'
 
-function func_grep () {
+function func_regex_grep () {
    grep -nP "$UNSAFE_HTML_IMG|$UNSAFE_HTML_LINK|$UNSAFE_HTML_SCRIPT" --exclude-dir=.svn --include=*.php -r $1
    grep -nP "$UNSAFE_CSS_BACKGROUND" --exclude-dir=.svn --include=*.css -r $1
    #grep -nP "$UNSAFE_JS_SOURCE|$UNSAFE_HTML_IMG|$UNSAFE_HTML_LINK|$UNSAFE_HTML_SCRIPT" --exclude-dir=.svn --include=*.js -r $1
-   grep -nP "$UNSAFE_HTML_IMG|$UNSAFE_HTML_LINK|$UNSAFE_HTML_SCRIPT|$UNSAFE_CSS_BACKGROUND" --exclude-dir=.svn --include=*.htm --include=*.html --include=*.html5 -r $1
+   grep -nP "$UNSAFE_HTML_IMG|$UNSAFE_HTML_LINK|$UNSAFE_HTML_SCRIPT|$UNSAFE_CSS_BACKGROUND|$UNSAFE_HTML_FORM" --exclude-dir=.svn --include=*.htm --include=*.html --include=*.html5 -r $1
 }
 
 if [[ $OUTPUTSTYLE = "" || $OUTPUTSTYLE = "1" ]]; then
-    func_grep "$PROJ"
+    func_regex_grep "$PROJ"
 elif [[ $OUTPUTSTYLE != "1" ]]; then
-    func_grep "$PROJ" | \
+    func_regex_grep "$PROJ" | \
         gawk -F':' '{
             if(!($1 in arr)) {
                 arr[$1] = 1
