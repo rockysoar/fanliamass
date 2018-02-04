@@ -2,12 +2,13 @@
 
 # project dir
 PROJ="$1"
-OUTPUTSTYLE="$2"
+CTX="$2"
+OUTPUTSTYLE="$3"
 
 if [[ '' == $PROJ || ! -d $PROJ || 'h' == ${PROJ:0:1} ]]; then
-    echo "Usage: $0 dir [style]"
+    echo "Usage: $0 dir [output style]"
     echo "    dir: project dir"
-    echo "    style: output format, 1(default): output 'grep -n'. 2: aggregate and output"
+    echo "    output style: 1(default): output like 'grep -Pn \"perl-regex\"'. 2: aggregated by file name."
     exit 255
 fi
 
@@ -20,19 +21,26 @@ UNSAFE_HTML_SCRIPT='<script.+?src\s*=\s*("|\0x27)?(http:|\{\$[^}]+(?<!\|fsdk_fit
 UNSAFE_CSS_BACKGROUND='background(-image)?\s*:.*?url\(("|\0x27)?http:\/\/'
 # match "http://xxx" that not commented out
 UNSAFE_JS_SOURCE='^(?!\s*(\/|\*)).*?("|\0x27)?http:\/\/'
-UNSAFE_HTML_FORM='<form.+?action\s*=\s*("|\0x27)?http:\/\/'
+
+# switch http to https step by step, switch passport.fanli.com first
+UNSAFE_HTML_FORM='<form.+?action\s*=\s*("|\0x27)?http:\/\/passport\.(51)?fanli.com\/'
+UNSAFE_HTML_ANCHOR='<a.+?href\s*=\s*("|\0x27)?http:\/\/passport\.(51)?fanli.com\/'
 
 function func_regex_grep () {
-   grep -nP "$UNSAFE_HTML_IMG|$UNSAFE_HTML_LINK|$UNSAFE_HTML_SCRIPT" --exclude-dir=.svn --include=*.php -r $1
-   grep -nP "$UNSAFE_CSS_BACKGROUND" --exclude-dir=.svn --include=*.css -r $1
-   #grep -nP "$UNSAFE_JS_SOURCE|$UNSAFE_HTML_IMG|$UNSAFE_HTML_LINK|$UNSAFE_HTML_SCRIPT" --exclude-dir=.svn --include=*.js -r $1
-   grep -nP "$UNSAFE_HTML_IMG|$UNSAFE_HTML_LINK|$UNSAFE_HTML_SCRIPT|$UNSAFE_CSS_BACKGROUND|$UNSAFE_HTML_FORM" --exclude-dir=.svn --include=*.htm --include=*.html --include=*.html5 -r $1
+   if [[ 'aform' == "$CTX" ]]; then
+       grep -nP "$UNSAFE_HTML_ANCHOR|$UNSAFE_HTML_FORM" --exclude-dir=.svn --exclude-dir=Runtime --include=*.htm --include=*.html --include=*.html5 -r $PROJ
+   else
+       grep -nP "$UNSAFE_HTML_IMG|$UNSAFE_HTML_LINK|$UNSAFE_HTML_SCRIPT" --exclude-dir=.svn --exclude-dir=Runtime --include=*.php -r $PROJ
+       grep -nP "$UNSAFE_CSS_BACKGROUND" --exclude-dir=.svn --exclude-dir=Runtime --include=*.css -r $PROJ
+       #grep -nP "$UNSAFE_JS_SOURCE|$UNSAFE_HTML_IMG|$UNSAFE_HTML_LINK|$UNSAFE_HTML_SCRIPT" --exclude-dir=.svn --exclude-dir=Runtime --include=*.js -r $PROJ
+       grep -nP "$UNSAFE_HTML_IMG|$UNSAFE_HTML_LINK|$UNSAFE_HTML_SCRIPT|$UNSAFE_CSS_BACKGROUND" --exclude-dir=.svn --exclude-dir=Runtime --include=*.htm --include=*.html --include=*.html5 -r $PROJ
+   fi
 }
 
 if [[ $OUTPUTSTYLE = "" || $OUTPUTSTYLE = "1" ]]; then
-    func_regex_grep "$PROJ"
+    func_regex_grep
 elif [[ $OUTPUTSTYLE != "1" ]]; then
-    func_regex_grep "$PROJ" | \
+    func_regex_grep | \
         gawk -F':' '{
             if(!($1 in arr)) {
                 arr[$1] = 1
