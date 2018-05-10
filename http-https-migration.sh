@@ -6,9 +6,12 @@ CTX="$2"
 OUTPUTSTYLE="$3"
 
 if [[ '' == $PROJ || ! -d $PROJ || 'h' == ${PROJ:0:1} ]]; then
-    echo "Usage: $0 dir [output style]"
-    echo "    dir: project dir"
-    echo "    output style: 1(default): output like 'grep -Pn \"perl-regex\"'. 2: aggregated by file name."
+    echo "Usage: $0 dir [anchor and form] [output style]
+    dir: project dir
+    af:  search anchor and form
+    output style: 
+      1(default), output like 'grep -Pn \"perl-regex\"'. 
+      2: aggregated by file name."
     exit 255
 fi
 
@@ -23,11 +26,11 @@ UNSAFE_CSS_BACKGROUND='background(-image)?\s*:.*?url\(("|\0x27)?http:\/\/'
 UNSAFE_JS_SOURCE='^(?!\s*(\/|\*)).*?("|\0x27)?http:\/\/'
 
 # switch http to https step by step, switch passport.fanli.com first
-UNSAFE_HTML_FORM='<form.+?action\s*=\s*("|\0x27)?http:\/\/passport\.(51)?fanli.com\/'
-UNSAFE_HTML_ANCHOR='<a.+?href\s*=\s*("|\0x27)?http:\/\/passport\.(51)?fanli.com\/'
+UNSAFE_HTML_FORM='<form.+?action\s*=\s*("|\0x27)?http:\/\/\w+\.(51)?fanli.com\/'
+UNSAFE_HTML_ANCHOR='<a.+?href\s*=\s*("|\0x27)?http:\/\/\w+\.(51)?fanli.com\/'
 
 function func_regex_grep () {
-   if [[ 'aform' == "$CTX" ]]; then
+   if [[ 'af' == "$CTX" ]]; then
        grep -nP "$UNSAFE_HTML_ANCHOR|$UNSAFE_HTML_FORM" --exclude-dir=.svn --exclude-dir=Runtime --include=*.htm --include=*.html --include=*.html5 -r $PROJ
    else
        grep -nP "$UNSAFE_HTML_IMG|$UNSAFE_HTML_LINK|$UNSAFE_HTML_SCRIPT" --exclude-dir=.svn --exclude-dir=Runtime --include=*.php -r $PROJ
