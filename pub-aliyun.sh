@@ -8,6 +8,13 @@ SSHPWD=${ALIYUN_SSH_PWD:-''}
 COL_RED='\033[0;31m'
 COL_NO='\033[0;0m'
 
+if [[ -z "$1" ]]; then
+    echo "Usage: $0 projectName...
+       step 1: export ALIYUN_SSH_PWD='YOUR ALIYUN SSH PASSWORD'.
+       step 2: bash $0 fsdk fans."
+    echo 
+fi
+
 err() {
     echo -e "[${COL_RED}error${COL_NO}] ${1}"
     exit 255
