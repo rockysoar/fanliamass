@@ -39,8 +39,8 @@ for proj in "${PROJS[@]}"; do
     # copy symlinks as symlinks
     rsync -av --max-size=2M --delete --delete-during \
         -e "sshpass -p ${SSHPWD} ssh -o StrictHostKeyChecking=no -l tuangouadmin" \
-        --exclude='.env' --exclude='.idel' --exclude='.git*' --exclude='.svn*' --exclude='Conf' --exclude='config' --exclude='Runtime' \
-        "$WEBROOT/$proj" "tuangouadmin@47.93.253.116:$WEBROOT/$proj"
+        --exclude='.env' --exclude='.idel' --exclude='.git*' --exclude='.svn*' --exclude='/Conf' --exclude='/config' --exclude='Runtime' --exclude='/templates_compiled' \
+        "$WEBROOT/$proj/" "tuangouadmin@47.93.253.116:$WEBROOT/$proj/"
 
     log "publish ${proj} complete."
 done
