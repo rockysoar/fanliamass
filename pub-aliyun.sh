@@ -15,6 +15,10 @@ if [[ -z "$1" ]]; then
     echo 
 fi
 
+if [[ -z "$SSHPWD" ]]; then
+    err '`export ALIYUN_SSH_PWD="YOUR ALIYUN SSH PASSWORD"` first.'
+fi
+
 err() {
     echo -e "[${COL_RED}error${COL_NO}] ${1}"
     exit 255
@@ -24,9 +28,34 @@ log() {
     echo -e "[info] ${1}" 
 }
 
-if [[ -z "$SSHPWD" ]]; then
-    err '`export ALIYUN_SSH_PWD="YOUR ALIYUN SSH PASSWORD"` first.'
-fi
+rsyncode() {
+    local proj="$1"
+    rsync -av --max-size=2M --delete --delete-during \
+        -e "sshpass -p ${SSHPWD} ssh -o StrictHostKeyChecking=no -l tuangouadmin" \
+        --exclude='.env' --exclude='.idel' --exclude='.git*' --exclude='.svn*' --exclude='/Conf' --exclude='/config' --exclude='Runtime' --exclude='/templates_compiled' \
+        "$WEBROOT/$proj/" "tuangouadmin@47.93.253.116:$WEBROOT/$proj/"
+}
+
+cleancache() {
+    local proj="$1"
+    local rmlist=""
+
+    case $proj in
+    fsdk)
+        rmlist="templates_compiled/"
+        ;;
+    daishu|daishu-app)
+        rmlist="*/Runtime/"
+        ;;
+    esac
+
+    if [[ -z "$rmlist" ]]; then
+        return
+    fi
+
+    log "remove ${WEBROOT}/${proj}/$rmlist"
+    sshpass -p "${SSHPWD}" ssh -o StrictHostKeyChecking=no tuangouadmin@47.93.253.116 "rm -rf ${WEBROOT}/${proj}/$rmlist"
+}
 
 IFS=$" \t\n"
 for proj in "${PROJS[@]}"; do
@@ -37,10 +66,9 @@ for proj in "${PROJS[@]}"; do
     fi
 
     # copy symlinks as symlinks
-    rsync -av --max-size=2M --delete --delete-during \
-        -e "sshpass -p ${SSHPWD} ssh -o StrictHostKeyChecking=no -l tuangouadmin" \
-        --exclude='.env' --exclude='.idel' --exclude='.git*' --exclude='.svn*' --exclude='/Conf' --exclude='/config' --exclude='Runtime' --exclude='/templates_compiled' \
-        "$WEBROOT/$proj/" "tuangouadmin@47.93.253.116:$WEBROOT/$proj/"
+    rsyncode "$proj"
+
+    cleancache "$proj"
 
     log "publish ${proj} complete."
 done
