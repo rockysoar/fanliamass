@@ -1,8 +1,9 @@
 #! /bin/bash
 
 ENV="$1"
-PROJS=("${@:1}")
-WEBROOT='/tmp'
+PROJS=("${@:2}")
+CODEROOT='/tmp/git-source'
+WEBROOT='/usr/local/webdata'
 SSHPWD=${ALIYUN_SSH_PWD:-''}
 
 GITREPO='git@gitea.office.51fanli.com:phpweb'
@@ -23,15 +24,25 @@ log() {
 }
 
 if [[ -z "$1" ]]; then
-    echo "Usage: $0 projectName...
-       su tuangouadmin 
-       step 1: export ALIYUN_SSH_PWD='YOUR ALIYUN SSH PASSWORD'.
-       step 2: bash $0 fsdk fans."
+    echo "Usage: $0 [trunk|prod] projectName...
+       step 1. su tuangouadmin 
+       step 2. export ALIYUN_SSH_PWD='YOUR ALIYUN SSH PASSWORD'.
+       step 3. \$bash $0 [trunk|prod] fsdk fans."
     echo 
 fi
 
 if [[ 'tuangouadmin' != `whoami` ]]; then
     err 'you should execute with tuangouadmin.'
+fi
+
+[ -d $CODEROOT ] || mkdir -p $CODEROOT
+
+if [[ 'prod' != "$ENV" && 'trunk' != "$ENV" ]]; then
+    err 'publish enviroment should be: prod OR trunk'
+fi
+
+if [[ -z "$PROJS" ]]; then
+    err 'you should specify at least on project to publish'
 fi
 
 if [[ -z "$SSHPWD" ]]; then
@@ -44,31 +55,46 @@ fi
 
 pull_from_git() {
     local proj="$1"
-    log "git clone OR git pull from remote: $proj."
+    log "git clone OR git pull from remote: $GITREPO/${proj}.git"
 
-    if [[ ! -d "$WEBROOT/$proj/.git" ]]; then
-        rm -rf "$WEBROOT/$proj" && mkdir "$WEBROOT/$proj"
-        git clone --progress -v -b master --single-branch "$GITREPO/${proj}.git" "$WEBROOT/$proj"
-    elif [[ ! -d "$WEBROOT/$proj" ]]; then
-        mkdir "$WEBROOT/$proj"
-        git clone --progress -v -b master --single-branch "$GITREPO/${proj}.git" "$WEBROOT/$proj"
-    else
-        (cd "$WEBROOT/$proj" && git pull origin master)
+    local branch=""
+    if [[ 'trunk' = $ENV ]]; then
+        branch='develop'
+    elif [[ 'prod' = $ENV ]]; then
+        branch='master'
     fi
 
-    (cd "$WEBROOT/$proj" && git reset --hard && git checkout master)
+    if [[ ! -d "$CODEROOT/$proj/.git" ]]; then
+        # git clone --progress -v -b "${branch}" --single-branch "$GITREPO/${proj}.git" "$CODEROOT/$proj"
+        git clone --progress -v "$GITREPO/${proj}.git" "$CODEROOT/$proj"
+    fi
+
+    (cd "$CODEROOT/$proj" && git checkout "${branch}" && git fetch origin "${branch}" && git reset --hard origin/"${branch}")
+}
+
+get_pub_hosts() {
+    case "$1" in
+    prod)
+        echo '47.93.253.116'
+        ;;
+    trunk)
+        echo '47.93.253.116'
+        ;;
+    esac
 }
 
 rsyn_source() {
-    local proj="$1"
+    local ipAddr="$1"
+    local proj="$2"
     rsync -av --max-size=2M --delete --delete-during \
         -e "sshpass -p ${SSHPWD} ssh -o StrictHostKeyChecking=no -l tuangouadmin" \
         --exclude='.env' --exclude='.idel' --exclude='.git*' --exclude='.svn*' --exclude='/Conf' --exclude='/config' --exclude='Runtime' --exclude='/templates_compiled' \
-        "$WEBROOT/$proj/" "tuangouadmin@47.93.253.116:$WEBROOT/$proj/"
+        "$CODEROOT/$proj/" "tuangouadmin@$ipAddr:$WEBROOT/$proj/"
 }
 
 cache_clean() {
-    local proj="$1"
+    local ipAddr="$1"
+    local proj="$2"
     local rmlist=""
 
     case $proj in
@@ -81,11 +107,11 @@ cache_clean() {
     esac
 
     if [[ -z "$rmlist" ]]; then
-        return
+        return 0
     fi
 
-    log "remove ${WEBROOT}/${proj}/$rmlist"
-    sshpass -p "${SSHPWD}" ssh -o StrictHostKeyChecking=no tuangouadmin@47.93.253.116 "rm -rf ${WEBROOT}/${proj}/$rmlist"
+    log "remove remote ${WEBROOT}/${proj}/$rmlist"
+    sshpass -p "${SSHPWD}" ssh -o StrictHostKeyChecking=no "tuangouadmin@$ipAddr" "rm -rf ${WEBROOT}/${proj}/$rmlist"
 }
 
 IFS=$" \t\n"
@@ -94,14 +120,15 @@ for proj in "${PROJS[@]}"; do
 
     pull_from_git $proj
 
-    if [[ ! -d "$WEBROOT/$proj" ]]; then
-        err "project NOT exists: $WEBROOT/$proj."
+    if [[ ! -d "$CODEROOT/$proj" ]]; then
+        err "project NOT exists: $CODEROOT/$proj."
     fi
 
+    targetHosts=$(get_pub_hosts "$ENV")
     # copy symlinks as symlinks
-    rsyn_source "$proj"
+    rsyn_source "${targetHosts}" "$proj"
 
-    cache_clean "$proj"
+    cache_clean "${targetHosts}" "$proj"
 
     log "publish ${proj} complete."
 done
