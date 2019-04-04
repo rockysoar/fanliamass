@@ -1,7 +1,7 @@
 # ./buildconf
- ./buildconf --force
- Forcing buildconf
- Removing configure caches
+    ./buildconf --force
+    Forcing buildconf
+    Removing configure caches
 
 # ./configure
     './configure' '--prefix=/ usr/local/php7.3' \
@@ -46,54 +46,55 @@
     '--with-readline' \
     '--with-zlib' \
     '--disable-all'
-# Compile failure:
+# Compile failure
     checking for WebPGetInfo in -lwebp... yes
     checking for jpeg_read_header in -ljpeg... yes
     configure: error: png.h not found.
-## resolve:
+## resolved
     sudo yum install -y libpng libpng-devel
-# Compile failure:
+# Compile failure
     checking for PSPELL support... no
     checking for libedit readline replacement... no
     checking for readline support... yes
     configure: error: Please reinstall readline - I cannot find readline.h
-### resolve:
+## resolved
     sudo yum install libedit-devel readline-devel
-# Compile failure:
+# Compile failure
     checking libzip... yes
     checking for the location of zlib... /usr
     checking for pkg-config... (cached) /usr/bin/pkg-config
     checking for libzip... not found
     configure: error: Please reinstall the libzip distribution
-## resolve:
+## resolved
     sudo yum install libzip-devel
-# Compile failure:
+# Compile failure
     checking libzip... yes
     checking for the location of zlib... /usr
     checking for pkg-config... (cached) /usr/bin/pkg-config
     checking for libzip... configure: error: system libzip must be upgraded to version >= 0.11
-## resolve:
+## resolve
     wget http://rpms.remirepo.net/enterprise/6/remi/x86_64//libzip-last-1.1.3-1.el6.remi.x86_64.rpm
     rpm -Uvh libzip-last-1.1.3-1.el6.remi.x86_64.rpm
-
+    
     wget http://rpms.remirepo.net/enterprise/6/remi/x86_64//libzip-last-devel-1.1.3-1.el6.remi.x86_64.rpm
     sudo rpm -Uvh libzip-last-devel-1.1.3-1.el6.remi.x86_64.rpm
-### error:
+### error
     libzip-devel < 1.1.3 conflicts with libzip-last-devel-1.1.3-1.el6.remi.x86_6
-#### resolve:
+### resolve
     sudo yum remove libzip -y
     sudo rpm -Uvh libzip-last-devel-1.1.3-1.el6.remi.x86_64.rpm
 
-# Compile Warning:
+# Compile Warning
     configure: WARNING: unrecognized options: --enable-gd-native-ttf, --with-mcrypt, --with-mysql
+
 # make
-## error
+## make failure
     /etc/libwebp/lib/libwebp.a: could not read symbols: Bad value
     collect2: ld returned 1 exit status
     make: *** [libphp7.la] Error 1
     make: *** Waiting for unfinished jobs....
-## resolve
-# remove '--with-webp-dir=/etc/libwebp'
+## resolved
+    remove '--with-webp-dir=/etc/libwebp'
 
 # make test
     =====================================================================
@@ -131,8 +132,7 @@
       page: phpize.1
       page: php-config.1
 
-
-# check
+# test php7
     /usr/local/php7.3/bin/php -v
     PHP 7.3.3 (cli) (built: Apr  4 2019 17:38:55) ( NTS )
     Copyright (c) 1997-2018 The PHP Group
@@ -147,9 +147,17 @@
     LoadModule php7_module        modules/libphp7.so
     #LoadModule php5_module        modules/libphp5.so
 
-# enviroment /etc/profile
-     PATH="$PATH:/usr/local/php7.3/bin/:"
-     . /etc/profile
+    /usr/local/apache2//bin/httpd -k restart
+
+# test apache2handler
+    info.php
+    <?php
+        phpinfo();
+
+# environment 
+    vi /etc/profile
+    PATH="$PATH:/usr/local/php7.3/bin/:"
+    . /etc/profile
 
 # other
      ln -s /usr/local/php7.3/bin/php /usr/bin/php7
