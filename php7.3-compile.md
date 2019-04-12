@@ -65,7 +65,8 @@
 
 # Fetch php-7.3.3 source
     $ git clone -b PHP-7.3.3 https://github.com/php/php-src.git php-7.3.3
-    error: fatal: Out of memory, malloc failed (tried to allocate 31476624 bytes)
+    ...
+    fatal: Out of memory, malloc failed (tried to allocate 31476624 bytes)
 ## resolved: 
     增加CTID(OpenVZ)内存: 
     $ vzctl set 114 --ram 2048M --swap 16M --save
@@ -83,6 +84,19 @@
     ./buildconf --force
     Forcing buildconf
     Removing configure caches
+
+    OR:
+    $ wget http://ftp.gnu.org/gnu/autoconf/autoconf-2.69.tar.gz
+    $ tar xvf autoconf-2.69.tar.gz
+    $ cd autoconf-2.69
+    $ ./configure --prefix=/usr
+    $ make && sudo make install
+
+    $ wget http://ftp.gnu.org/gnu/automake/automake-1.14.tar.gz
+    $ tar xvf automake-1.14.tar.gz
+    $ cd automake-1.14
+    $ ./configure --prefix=/usr
+    $ make && sudo make install
 
 # ./configure
     './configure' '--prefix=/ usr/local/php7.3' \
@@ -127,12 +141,85 @@
     '--with-readline' \
     '--with-zlib' \
     '--disable-all'
-# Compile failure
+# Compile failure: bison invalid
+    ...
+    checking for bison version... invalid
+    configure: WARNING: This bison version is not supported for regeneration of the Zend/PHP parsers (found: none, min: 204, excluded: ).
+    checking for re2c... no
+    configure: WARNING: You will need re2c 0.13.4 or later if you want to regenerate PHP parsers.
+    configure: error: bison is required to build PHP/Zend when building a GIT checkout!
+## resloved: install bison from source
+    $ wget http://ftp.gnu.org/gnu/bison/bison-2.5.1.tar.gz
+    $ tar xvf bison-2.5.1.tar.gz
+    $ cd bison-2.5.1
+    $ ./configure --prefix=/usr
+    $ make && sudo make install
+# Compile failed: libxml2
+    configure: error: libxml2 not found. Please check your libxml2 installation.
+## resolved: 
+    $ yum list installed|grep libxml2-devel
+    $ sudo yum install libxml2-devel
+# Compile failed: openssl
+    ...
+    checking whether to use system default cipher list instead of hardcoded value... no
+    checking for RAND_egd... no
+    checking for pkg-config... /usr/bin/pkg-config
+    configure: error: Cannot find OpenSSL's <evp.h>
+## resolved:
+    $ yum list installed|grep openssl
+    $ sudo yum install openssl-devel
+# Compile failed: bzip2
+    ...
+    checking for BZip2 in default path... not found
+    configure: error: Please reinstall the BZip2 distribution
+## resolved:
+    $ sudo yum install bzip2-devel
+# Compile failed: curl
+    ...
+    checking for cURL 7.15.5 or greater... configure: error: cURL version 7.15.5 or later is required to compile php with cURL support
+## resolved:
+    $ yum list installed|grep curl
+    curl.x86_64                     7.19.7-52.el6                    @base          
+    libcurl.x86_64                  7.19.7-52.el6                    @base          
+    python-pycurl.x86_64            7.19.0-9.el6                     @base          
+
+    curl已经安装过了，需安装curl-devel包
+    $ sudo yum install curl-devel
+# Compile failed: webp
+    ...
     checking for WebPGetInfo in -lwebp... yes
     checking for jpeg_read_header in -ljpeg... yes
     configure: error: png.h not found.
-## resolved
+    ...
+    configure: error: webp/decode.h not found.
+    ...
+    configure: error: jpeglib.h not found.
+    ...
+    configure: error: png.h not found.
+    ...
+    configure: error: freetype-config not found.
+## resolved:
     sudo yum install -y libpng libpng-devel
+
+    检查webp/decode.h头文件的提供者
+    $ yum provides '*/webp/decode.h'
+    ...
+    libwebp-devel-0.4.3-3.el6.x86_64 : Development files for libwebp, a library for the WebP format
+    Repo        : epel
+    Matched from:
+    Filename    : /usr/include/webp/decode.h
+
+    进而安装 libwebp-devel
+    $ sudo yum install libwebp-devel
+
+    $ sudo yum install libjpeg-turbo-devel
+
+    $ sudo yum install libpng-devel
+
+    $ yum list installed|grep freetype
+    freetype.x86_64                 2.3.11-17.el6                    @base
+
+    $ sudo yum install freetype-devel
 # Compile failure
     checking for PSPELL support... no
     checking for libedit readline replacement... no
@@ -165,7 +252,7 @@
     sudo yum remove libzip -y
     sudo rpm -Uvh libzip-last-devel-1.1.3-1.el6.remi.x86_64.rpm
 
-# Compile Warning
+# Compile successed with a WARNING
     configure: WARNING: unrecognized options: --enable-gd-native-ttf, --with-mcrypt, --with-mysql
 
 # make
