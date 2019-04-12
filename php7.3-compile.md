@@ -1,4 +1,85 @@
-# ./buildconf
+# System Information
+    $ uname -a
+    Linux ovz-junhua-zhang 2.6.32-042stab120.19 #1 SMP Mon Feb 20 20:05:53 MSK 2017 x86_64 x86_64 x86_64 GNU/Linux
+    $ cat /etc/centos-release
+    CentOS release 6.8 (Final)
+     
+    $ ldd --version
+    ldd (GNU libc) 2.12
+    Copyright (C) 2010 Free Software Foundation, Inc.
+    This is free software; see the source for copying conditions.  There is NO
+    warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    Written by Roland McGrath and Ulrich Drepper.
+
+# Yum Information
+    $ rpm -vh 'http://dl.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm'
+
+    $ yum repolist -v
+    Loading "fastestmirror" plugin
+    Config time: 0.017
+    Yum Version: 3.2.29
+    Loading mirror speeds from cached hostfile
+     * base: mirrors.aliyun.com
+     * epel: mirrors.aliyun.com
+     * extras: mirrors.aliyun.com
+     * updates: mirrors.aliyun.com
+    Setting up Package Sacks
+    pkgsack time: 0.027
+    Repo-id      : base
+    Repo-name    : CentOS-6 - Base - mirrors.aliyun.com
+    Repo-revision: 1530286202
+    Repo-updated : Fri Jun 29 23:37:23 2018
+    Repo-pkgs    : 6,713
+    Repo-size    : 5.5 G
+    Repo-baseurl : http://mirrors.aliyun.com/centos/6/os/x86_64/, http://mirrors.aliyuncs.com/centos/6/os/x86_64/, http://mirrors.cloud.aliyuncs.com/centos/6/os/x86_64/
+    Repo-expire  : 21,600 second(s) (last: Thu Apr 11 18:20:25 2019)
+    
+    Repo-id      : epel
+    Repo-name    : Extra Packages for Enterprise Linux 6 - x86_64
+    Repo-revision: 1554880898
+    Repo-updated : Wed Apr 10 15:41:46 2019
+    Repo-pkgs    : 12,522
+    Repo-size    : 11 G
+    Repo-metalink: https://mirrors.fedoraproject.org/metalink?repo=epel-6&arch=x86_64
+      Updated    : Wed Apr 10 15:41:46 2019
+    Repo-baseurl : http://mirrors.aliyun.com/epel/6/x86_64/ (21 more)
+    Repo-expire  : 21,600 second(s) (last: Thu Apr 11 18:20:27 2019)
+    
+    Repo-id      : extras
+    Repo-name    : CentOS-6 - Extras - mirrors.aliyun.com
+    Repo-revision: 1554122385
+    Repo-updated : Mon Apr  1 20:39:45 2019
+    Repo-pkgs    : 46
+    Repo-size    : 13 M
+    Repo-baseurl : http://mirrors.aliyun.com/centos/6/extras/x86_64/, http://mirrors.aliyuncs.com/centos/6/extras/x86_64/, http://mirrors.cloud.aliyuncs.com/centos/6/extras/x86_64/
+    Repo-expire  : 21,600 second(s) (last: Thu Apr 11 18:20:33 2019)
+    
+    Repo-id      : updates
+    Repo-name    : CentOS-6 - Updates - mirrors.aliyun.com
+    Repo-revision: 1554840057
+    Repo-updated : Wed Apr 10 04:06:00 2019
+    Repo-pkgs    : 421
+    Repo-size    : 5.4 G
+    Repo-baseurl : http://mirrors.aliyun.com/centos/6/updates/x86_64/, http://mirrors.aliyuncs.com/centos/6/updates/x86_64/, http://mirrors.cloud.aliyuncs.com/centos/6/updates/x86_64/
+    Repo-expire  : 21,600 second(s) (last: Thu Apr 11 18:20:33 2019)
+
+# Fetch php-7.3.3 source
+    $ git clone -b PHP-7.3.3 https://github.com/php/php-src.git php-7.3.3
+    error: fatal: Out of memory, malloc failed (tried to allocate 31476624 bytes)
+## resolved: 
+    增加CTID(OpenVZ)内存: 
+    $ vzctl set 114 --ram 2048M --swap 16M --save
+
+# ./buildconf --force
+    Forcing buildconf
+    Removing configure caches
+    buildconf: checking installation...
+    buildconf: autoconf not found.
+           You need autoconf version 2.68 or newer installed
+           to build PHP from Git.
+    make: *** [buildmk.stamp] Error 1
+## resolved
+    $ sudo yum install autoconf automake
     ./buildconf --force
     Forcing buildconf
     Removing configure caches
