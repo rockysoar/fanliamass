@@ -99,7 +99,7 @@
     $ make && sudo make install
 
 # ./configure
-    './configure' '--prefix=/ usr/local/php7.3' \
+    $ './configure' '--prefix=/usr/local/php7.3' \
     '--disable-ipv6' \
     '--enable-calendar' \
     '--enable-ctype' \
@@ -199,7 +199,7 @@
     ...
     configure: error: freetype-config not found.
 ## resolved:
-    sudo yum install -y libpng libpng-devel
+    $ sudo yum install -y libpng libpng-devel
 
     检查webp/decode.h头文件的提供者
     $ yum provides '*/webp/decode.h'
@@ -226,7 +226,7 @@
     checking for readline support... yes
     configure: error: Please reinstall readline - I cannot find readline.h
 ## resolved
-    sudo yum install libedit-devel readline-devel
+    $ sudo yum install libedit-devel readline-devel
 # Compile failure
     checking libzip... yes
     checking for the location of zlib... /usr
@@ -234,23 +234,23 @@
     checking for libzip... not found
     configure: error: Please reinstall the libzip distribution
 ## resolved
-    sudo yum install libzip-devel
+    $ sudo yum install libzip-devel
 # Compile failure
     checking libzip... yes
     checking for the location of zlib... /usr
     checking for pkg-config... (cached) /usr/bin/pkg-config
     checking for libzip... configure: error: system libzip must be upgraded to version >= 0.11
 ## resolve
-    wget http://rpms.remirepo.net/enterprise/6/remi/x86_64//libzip-last-1.1.3-1.el6.remi.x86_64.rpm
-    rpm -Uvh libzip-last-1.1.3-1.el6.remi.x86_64.rpm
-    
-    wget http://rpms.remirepo.net/enterprise/6/remi/x86_64//libzip-last-devel-1.1.3-1.el6.remi.x86_64.rpm
-    sudo rpm -Uvh libzip-last-devel-1.1.3-1.el6.remi.x86_64.rpm
+    $ wget http://rpms.remirepo.net/enterprise/6/remi/x86_64//libzip-last-1.1.3-1.el6.remi.x86_64.rpm
+    $ rpm -Uvh libzip-last-1.1.3-1.el6.remi.x86_64.rpm
+
+    $ wget http://rpms.remirepo.net/enterprise/6/remi/x86_64//libzip-last-devel-1.1.3-1.el6.remi.x86_64.rpm
+    $ sudo rpm -Uvh libzip-last-devel-1.1.3-1.el6.remi.x86_64.rpm
 ### error
     libzip-devel < 1.1.3 conflicts with libzip-last-devel-1.1.3-1.el6.remi.x86_6
 ### resolve
-    sudo yum remove libzip -y
-    sudo rpm -Uvh libzip-last-devel-1.1.3-1.el6.remi.x86_64.rpm
+    $ sudo yum remove libzip -y
+    $ sudo rpm -Uvh libzip-last-devel-1.1.3-1.el6.remi.x86_64.rpm
 
 # Compile successed with a WARNING
     configure: WARNING: unrecognized options: --enable-gd-native-ttf, --with-mcrypt, --with-mysql
@@ -301,32 +301,30 @@
       page: php-config.1
 
 # test php7
-    /usr/local/php7.3/bin/php -v
+    $ /usr/local/php7.3/bin/php -v
     PHP 7.3.3 (cli) (built: Apr  4 2019 17:38:55) ( NTS )
     Copyright (c) 1997-2018 The PHP Group
     Zend Engine v3.3.3, Copyright (c) 1998-2018 Zend Technologies
 
-# copy php.ini
-    sudo cp /opt/php-7.3.3/php.ini-* /usr/local/php7.3/lib
-    sudo mv php.ini-development php.ini
+# config php.init & apache2handler
+    $ sudo cp /opt/php-7.3.3/php.ini-* /usr/local/php7.3/lib
+    $ sudo mv php.ini-development php.ini
 
-# config apache2handler
     Listen 80
     LoadModule php7_module        modules/libphp7.so
     #LoadModule php5_module        modules/libphp5.so
 
-    /usr/local/apache2//bin/httpd -k restart
+    $ /usr/local/apache2//bin/httpd -k restart
 
 # test apache2handler
-    info.php
+    $ vi info.php
     <?php
         phpinfo();
 
 # environment 
-    vi /etc/profile
-    PATH="$PATH:/usr/local/php7.3/bin/:"
-    . /etc/profile
-
-# other
-     ln -s /usr/local/php7.3/bin/php /usr/bin/php7
+    $ vi /usr/bin/php7
+    #! /bin/bash
+    export PATH="/usr/local/php7.3/bin:$PATH"
+    php "$@"
+    $ chmod +x /usr/bin/php7 
 
