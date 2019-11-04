@@ -4,6 +4,7 @@
 
 alias ..='cd ../'
 alias ...='cd ../../'
+alias .2='cd ../../'
 alias .3='cd ../../../'
 alias mkdir='mkdir -pv'
 
@@ -31,4 +32,11 @@ if [[ ! -z $(which git) ]]; then
     git config --global alias.ci commit 
     git config --global alias.di diff
 fi
+
+alias vi.php5='vi /usr/local/php5/lib/php-safe.ini'
+alias vi.php7='vi /usr/local/php7/lib/php.ini'
+alias vi.httpd='vi /usr/local/apache2/conf/httpd.conf'
+alias cd.php5='cd /usr/local/php5'
+alias cd.php7='cd /usr/local/php7'
+alias cd.apache='cd /usr/local/apache2/conf'
 
