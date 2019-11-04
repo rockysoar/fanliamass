@@ -16,14 +16,11 @@ def polymerize(url, degree = 2):
     if re.search(r'\.(?:js|css|ico|png|jpe?g|g?zip|xml|apk)', info.path, re.I): return
 
     keysPath, keysQuery = [], [] 
-    keys = re.split(r'/|-', info.path)
     # 处理pathinfo
-    for i in range(len(keys)):
-        k = keys[i]
-
-        if dropItem(k): continue
-        keysPath.append(k)
-    if len(keysPath) > 6: keysPath = keysPath[0:6]
+    keys = re.split(r'/|-', info.path)
+    for i in keys:
+        if dropItem(keys[i]): continue
+        keysPath.append(keys[i])
 
     # 处理QueryString
     if degree < 3:
@@ -36,8 +33,6 @@ def polymerize(url, degree = 2):
             keysQuery.append(kvStr)
         # 去重
         keysQuery = list(set(keysQuery))
-    pickNum = min(6, 8 - len(keysPath))
-    if len(keysQuery) > pickNum: keysQuery = keysQuery[0:pickNum]
     keysQuery.sort()
 
     hostname = polymerizeHostname(info.hostname)
